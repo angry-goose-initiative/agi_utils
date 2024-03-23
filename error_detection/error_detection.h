@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 namespace agi::error_detection {
 
@@ -12,4 +13,4 @@ namespace agi::error_detection {
  */
 uint8_t crc8(const uint8_t* data, std::size_t length);
 
-} // namespace agi::loaders
+} // namespace agi::error_detection
