@@ -7,14 +7,16 @@
 
 #pragma once
 
-#include <string_view>
+#include <cstddef>
 #include <cstdint>
+#include <string_view>
 
 namespace agi::loaders {
 
 enum class Res {
     OKAY,
     FILE_OPEN_ERROR,
+    FILE_FORMAT_ERROR,
     WRITE_ERROR
 };
 
@@ -33,12 +35,12 @@ public:
         , buf_offset_(buf_offset)
     {}
 
-    virtual bool operator()(size_t address, uint8_t data) {
+    bool operator()(size_t address, uint8_t data) override {
         size_t const buf_idx = address - this->buf_offset_;
         if (buf_idx >= this->buf_size_) {
             return false;
         } else {
-            this->buf_ptr_[buf_idx] = data;
+            this->buf_ptr_[buf_idx] = data; // NOLINT(*-pointer-arithmetic)
             return true;
         }
     }
@@ -50,4 +52,6 @@ private:
 
 Res elf_32(std::string_view file_name, BaseWriteFunctor & write_functor);
 
-} // namespace agi_utils::loaders
+Res verilog_32(std::string_view file_name, BaseWriteFunctor & write_functor);
+
+} // namespace agi::loaders
