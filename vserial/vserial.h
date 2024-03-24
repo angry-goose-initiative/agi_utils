@@ -3,8 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <string>
-#include <optional>
-
+#include <variant>
 
 namespace agi::vserial {
 
@@ -15,9 +14,18 @@ namespace agi::vserial {
      */
 
     struct Res {
-        std::optional<std::string> file_path;
-        std::optional<int> fd;
+        std::string file_path;
+        int fd;
     };
 
-    Res create_pseudo_serial();
+
+    struct Error_Res {
+        int open_pt = 0;
+        int grantpt = 0;
+        int unlockpt = 0;
+        bool ptsname = false;
+    };
+
+
+    std::variant<agi::vserial::Res, agi::vserial::Error_Res> create_pseudo_serial();
 } // namespace agi::vserial
