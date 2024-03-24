@@ -3,11 +3,9 @@
 
 
 agi::vserial::Res agi::vserial::create_pseudo_serial(){
-    int pt;
-    
     agi::vserial::Res return_value;
 
-    pt = open("/dev/ptmx", O_RDWR | O_NOCTTY);
+    int pt = open("/dev/ptmx", O_RDWR | O_NOCTTY);
     if (pt < 0)
     {
         perror("open /dev/ptmx");
