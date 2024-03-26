@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2024 Sam Graham
+ * See the LICENSE file at the root of the project for licensing info.
+*/
+
 #include "error_detection.h"
 
 uint8_t agi::error_detection::crc8(const uint8_t* data, std::size_t length) {

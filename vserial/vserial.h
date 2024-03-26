@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2024 Seb Atkinson
+ * See the LICENSE file at the root of the project for licensing info.
+*/
+
 #pragma once
 #include <fcntl.h>
 #include <iostream>

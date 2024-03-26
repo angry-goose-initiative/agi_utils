@@ -1,3 +1,10 @@
+/*
+ * Copyright (C) 2023-2024 John Jekel
+ * Copyright (C) 2023-2024 Nick Chan
+ * Copyright (C) 2024      Sam Graham
+ * See the LICENSE file at the root of the project for licensing info.
+*/
+
 #pragma once
 
 #include <string_view>
