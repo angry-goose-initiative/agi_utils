@@ -5,48 +5,52 @@
 
 #include "vserial.h"
 
+#include <array>
+#include <fcntl.h>
+#include <unistd.h>
+#include <variant>
 
-
-std::variant<agi::vserial::Res, agi::vserial::Error_Res> agi::vserial::create_pseudo_serial(){
-    agi::vserial::Res return_value;
-
-    int pt_fd = open("/dev/ptmx", O_RDWR | O_NOCTTY);
-     if (pt_fd < 0) {
-        agi::vserial::Error_Res error_return_value;
-        error_return_value.open_pt = pt_fd;
-        return error_return_value;
+std::variant<agi::vserial::PtInfo, agi::vserial::Error> agi::vserial::create_pseudo_serial() {
+    const int pt_fd = open("/dev/ptmx", O_RDWR | O_NOCTTY); // NOLINT(*-signed-bitwise)
+    if (pt_fd < 0) {
+        return agi::vserial::Error{
+            .sys_call = agi::vserial::Error::SysCall::OPEN,
+            .errno_val = errno
+        };
     }
 
     // Grant access to the slave pseudo-terminal
-    if (grantpt(pt_fd) == -1) {
+    if (grantpt(pt_fd) < 0) {
         close(pt_fd);
-        agi::vserial::Error_Res error_return_value;
-        error_return_value.grantpt = -1;
-        return return_value;
+        return agi::vserial::Error{
+            .sys_call = agi::vserial::Error::SysCall::GRANTPT,
+            .errno_val = errno
+        };
     }
 
     // Unlock the pseudo-terminal
-    if (unlockpt(pt_fd) == -1) {
+    if (unlockpt(pt_fd) < 0) {
         close(pt_fd);
-        agi::vserial::Error_Res error_return_value;
-        error_return_value.unlockpt = -1;
-        return return_value;
+        return agi::vserial::Error{
+            .sys_call = agi::vserial::Error::SysCall::UNLOCKPT,
+            .errno_val = errno
+        };
     }
 
     // Get the name of the slave pseudo-terminal
-    const char* pts_name = ptsname(pt_fd);
+    constexpr int MAX_PTSNAME_LEN = 100;
+    std::array<char, MAX_PTSNAME_LEN> pts_name{};
 
-    // Check if ptsname returned a valid string
-    if (pts_name == nullptr) {
-        // Return empty values if ptsname failed
+    if (ptsname_r(pt_fd, pts_name.data(), pts_name.size()) < 0) {
         close(pt_fd);
-        agi::vserial::Error_Res error_return_value;
-        error_return_value.ptsname = true;
-        return error_return_value;
+        return agi::vserial::Error{
+            .sys_call = agi::vserial::Error::SysCall::PTSNAME,
+            .errno_val = errno
+        };
     }
 
-    // Convert the C-style string to a C++ std::string
-    return_value.file_path = std::string(pts_name);
-    return_value.fd = pt_fd;
-    return return_value;
+    return agi::vserial::PtInfo{
+        .file_path = pts_name.data(),
+        .fd = pt_fd
+    };
 }
