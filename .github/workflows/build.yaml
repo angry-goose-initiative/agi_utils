@@ -1,0 +1,25 @@
+name: build
+
+on:
+  # Run actions fow all branches
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # - name: Install clang-tidy
+      #   run: sudo apt install clang-tidy
+
+      - name: Set up CMake
+        run: cmake -B build
+        # run: cmake cli/ -B cli/build -DENABLE_CLANG_TIDY=ON
+
+      - name: Build project
+        run: cmake --build build
