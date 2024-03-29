@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <string_view>
 
 namespace agi::loaders {
@@ -29,25 +30,23 @@ public:
 class BufferWriteFunctor : public BaseWriteFunctor {
 public:
     BufferWriteFunctor() = delete;
-    BufferWriteFunctor(uint8_t * buf_ptr, size_t buf_size, size_t buf_offset = 0)
-        : buf_ptr_(buf_ptr)
-        , buf_size_(buf_size)
-        , buf_offset_(buf_offset)
+    BufferWriteFunctor(std::span<uint8_t> buffer, size_t offset = 0)
+        : buffer_(buffer)
+        , offset_(offset)
     {}
 
     bool operator()(size_t address, uint8_t data) override {
-        size_t const buf_idx = address - this->buf_offset_;
-        if (buf_idx >= this->buf_size_) {
+        size_t const buf_idx = address - this->offset_;
+        if (buf_idx >= this->buffer_.size()) {
             return false;
         } else {
-            this->buf_ptr_[buf_idx] = data; // NOLINT(*-pointer-arithmetic)
+            this->buffer_[buf_idx] = data;
             return true;
         }
     }
 private:
-    uint8_t * buf_ptr_;
-    size_t    buf_size_;
-    size_t    buf_offset_;
+    std::span<uint8_t> buffer_;
+    size_t             offset_;
 };
 
 Res elf_32(std::string_view file_name, BaseWriteFunctor & write_functor);

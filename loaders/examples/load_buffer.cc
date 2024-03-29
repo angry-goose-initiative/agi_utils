@@ -23,7 +23,7 @@ int main(int argc, char * argv[])
     std::array<uint8_t, BUFFER_SIZE> buffer{};
 
     // Create write functor with the buffer information
-    agi::loaders::BufferWriteFunctor write_functor(buffer.data(), buffer.size());
+    agi::loaders::BufferWriteFunctor write_functor({buffer.data(), buffer.size()});
 
     // Call the loader
     auto const res = agi::loaders::elf_32(argv[1], write_functor); // NOLINT(*-pointer-arithmetic)
