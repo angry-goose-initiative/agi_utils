@@ -7,11 +7,15 @@
 
 #include "loaders.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 #include <fstream>
+#include <string>
 #include <vector>
 
-agi::loaders::Res agi::loaders::elf_32(std::string_view   file_name,
-                                       BaseWriteFunctor & write_functor)
+agi::loaders::Res agi::loaders::elf_32(std::string const & file_name,
+                                       BaseWriteFunctor &  write_functor)
 {
     std::ifstream file(file_name, std::ios::binary);
     if (!file) {
@@ -179,10 +183,10 @@ agi::loaders::Res agi::loaders::elf_32(std::string_view   file_name,
     return Res::OKAY;
 }
 
-agi::loaders::Res agi::loaders::verilog_32(std::string_view   file_name,
-                                           BaseWriteFunctor & write_functor)
+agi::loaders::Res agi::loaders::verilog_32(std::string const & file_name,
+                                           BaseWriteFunctor &  write_functor)
 {
-    std::fstream file = std::fstream(file_name);
+    std::fstream file(file_name);
     if (!file) {
         return Res::FILE_OPEN_ERROR;
     }

@@ -10,7 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
-#include <string_view>
+#include <string>
 
 namespace agi::loaders {
 
@@ -30,7 +30,7 @@ public:
 class BufferWriteFunctor : public BaseWriteFunctor {
 public:
     BufferWriteFunctor() = delete;
-    BufferWriteFunctor(std::span<uint8_t> buffer, size_t offset = 0)
+    BufferWriteFunctor(std::span<uint8_t> buffer, size_t offset = 0) // NOLINT(*explicit*)
         : buffer_(buffer)
         , offset_(offset)
     {}
@@ -49,8 +49,8 @@ private:
     size_t             offset_;
 };
 
-Res elf_32(std::string_view file_name, BaseWriteFunctor & write_functor);
+Res elf_32(std::string const & file_name, BaseWriteFunctor & write_functor);
 
-Res verilog_32(std::string_view file_name, BaseWriteFunctor & write_functor);
+Res verilog_32(std::string const & file_name, BaseWriteFunctor & write_functor);
 
 } // namespace agi::loaders
