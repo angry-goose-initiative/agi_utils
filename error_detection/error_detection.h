@@ -5,17 +5,18 @@
 
 #pragma once
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
+#include <span>
 
 namespace agi::error_detection {
 
 /**
  * @brief Compute 8 bit checksum on data buffer using polynomial division based CRC-8 algorithm
  * 
- * @param data, length
+ * @param data
  * @return 8 bit CRC checksum
  */
-uint8_t crc8(const uint8_t* data, std::size_t length);
+uint8_t crc8(std::span<uint8_t> data);
 
 } // namespace agi::error_detection
