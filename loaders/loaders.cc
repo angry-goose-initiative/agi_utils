@@ -7,6 +7,7 @@
 
 #include "loaders.h"
 
+#include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -14,10 +15,11 @@
 #include <string>
 #include <vector>
 
-agi::loaders::Res agi::loaders::elf_32(std::string const & file_name,
-                                       BaseWriteFunctor &  write_functor)
-{
-    std::ifstream file(file_name, std::ios::binary);
+agi::loaders::Res agi::loaders::elf_32(
+    const std::string& file_name,
+    BaseWriteFunctor&  write_functor
+) {
+    std::ifstream file(file_name.data(), std::ios::binary);
     if (!file) {
         return Res::FILE_OPEN_ERROR;
     }
@@ -63,9 +65,9 @@ agi::loaders::Res agi::loaders::elf_32(std::string const & file_name,
     file.read(reinterpret_cast<char *>(&file_header), sizeof(file_header));
 
     // Validate file header
-    constexpr char const * ELF_SIGNATURE = "\177ELF";
-    constexpr uint16_t     ELF_FILE_TYPE_EXEC = 2;
-    constexpr uint16_t     ELF_MACHINE_RISCV = 0xF3;
+    constexpr const char* ELF_SIGNATURE = "\177ELF";
+    constexpr uint16_t    ELF_FILE_TYPE_EXEC = 2;
+    constexpr uint16_t    ELF_MACHINE_RISCV = 0xF3;
     if (std::memcmp(file_header.e_ident.data(), ELF_SIGNATURE, std::strlen(ELF_SIGNATURE)) != 0 // Not an ELF Signature
         || file_header.e_type != ELF_FILE_TYPE_EXEC // Not an executable file
         || file_header.e_machine != ELF_MACHINE_RISCV // Not a riscv file
@@ -149,7 +151,7 @@ agi::loaders::Res agi::loaders::elf_32(std::string const & file_name,
             continue;
         }
         // Cache if section is contained in any PT_LOAD program segment
-        for (Elf32Chunk const& chunk : program_chunks) {
+        for (const Elf32Chunk& chunk : program_chunks) {
             if (
                 chunk.offset <= section_header.sh_offset &&
                 section_header.sh_offset < (chunk.offset + chunk.size)
@@ -165,7 +167,7 @@ agi::loaders::Res agi::loaders::elf_32(std::string const & file_name,
     }
 
     // Iterate over program data found in load segments
-    for (Elf32Chunk const& chunk : section_chunks) {
+    for (const Elf32Chunk& chunk : section_chunks) {
         file.seekg(chunk.offset, std::ios::beg);
         uint32_t addr = chunk.vaddr;
         // Load section
@@ -183,9 +185,10 @@ agi::loaders::Res agi::loaders::elf_32(std::string const & file_name,
     return Res::OKAY;
 }
 
-agi::loaders::Res agi::loaders::verilog_32(std::string const & file_name,
-                                           BaseWriteFunctor &  write_functor)
-{
+agi::loaders::Res agi::loaders::verilog_32(
+    const std::string& file_name,
+    BaseWriteFunctor&  write_functor
+) {
     std::fstream file(file_name);
     if (!file) {
         return Res::FILE_OPEN_ERROR;
@@ -198,7 +201,7 @@ agi::loaders::Res agi::loaders::verilog_32(std::string const & file_name,
         constexpr uint32_t HEX_CHARS_IN_WORD = 8U;
         constexpr int BASE_16 = 16;
         if (token.at(0) == '@') { // `@` indicates a new address (ASSUMING 32-BIT WORDS)
-            std::string const new_addr_str = token.substr(1);
+            const std::string new_addr_str = token.substr(1);
             if (new_addr_str.length() != HEX_CHARS_IN_WORD) {
                 // Not formatted correctly (bad address)
                 return Res::FILE_FORMAT_ERROR;
@@ -214,17 +217,16 @@ agi::loaders::Res agi::loaders::verilog_32(std::string const & file_name,
             }
             
             // The data word this token represents
-            uint32_t const data_word = std::stoul(token, nullptr, BASE_16);
+            uint32_t data_word = std::stoul(token, nullptr, BASE_16);
 
-            // FIXME(Nick) - This is wrong right now
             // Write the data word to memory and increment the address to the next word
-            for (size_t i = 0; i < 4; ++i) {
-                if (!write_functor(addr + i, 1)) {
+            for (int i = 0; i < sizeof(uint32_t); ++i) {
+                if (!write_functor(addr + i, static_cast<uint8_t>(data_word))) {
                     return Res::WRITE_ERROR;
                 }
+                data_word >>= CHAR_BIT;
             }
             
-            // write_memory(addr, DT_WORD, data_word, access_status);
             addr += 4;
         }
     }
