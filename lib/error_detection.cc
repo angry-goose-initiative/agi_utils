@@ -3,7 +3,7 @@
  * See the LICENSE file at the root of the project for licensing info.
 */
 
-#include "error_detection.h"
+#include "error_detection.hh"
 
 #include <climits>
 

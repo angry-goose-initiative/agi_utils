@@ -3,7 +3,7 @@
  * See the LICENSE file at the root of the project for licensing info.
 */
 
-#include "../vserial.h"
+#include "vserial.hh"
 
 #include <iostream>
 
